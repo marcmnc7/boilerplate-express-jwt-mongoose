@@ -1,5 +1,4 @@
 // TODO:
-  // ENV VARIABLES
   // REFRESH TOKEN
   // GOOGLE AUTH
 
@@ -7,6 +6,7 @@
 
 const express = require('express')
 const path = require('path')
+require('dotenv').config({ path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV}`)})
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const helmet = require("helmet")
@@ -15,7 +15,7 @@ const { handleError } = require('./lib/errors')
 
 // Database
 const database = require('./database/connection')
-database.connect('mongodb://localhost:27017/express-jwt-auth').catch(error => {
+database.connect(process.env.DATABASE_URI).catch(error => {
   throw new Error('Mongoose cant connect to DB', error)
 })
 
@@ -59,9 +59,9 @@ app.use((err, req, res, next) => {
   handleError(err, res)
 })
 
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', error => {
   // https://medium.com/@SigniorGratiano/express-error-handling-674bfdd86139
-  console.log(err.name, err.message)
+  console.log(error.name, error.message)
   console.log('UNHANDLED REJECTION! 💥 Shutting down...')
   process.exit(1)
 });

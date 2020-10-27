@@ -1,11 +1,11 @@
 const jwt = require("jsonwebtoken")
 
 function generateUserToken (user) {
-  return jwt.sign({ userId: user.id, roles: user.roles }, 'apiSecretKey')
+  return jwt.sign({ userId: user.id, roles: user.roles }, process.env.API_SECRET)
 }
 
 function verify (encodedToken) {
-  return jwt.verify(encodedToken, 'apiSecretKey')
+  return jwt.verify(encodedToken, process.env.API_SECRET)
 }
 
 module.exports = {
