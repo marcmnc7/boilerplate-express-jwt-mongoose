@@ -16,7 +16,6 @@ process.on('SIGINT', () => {
 })
 
 function connect (uri) {
-  if (!uri) throw new Error('No database URI')
   return mongoose.connect(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,

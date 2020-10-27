@@ -1,3 +1,8 @@
+// TODO:
+  // ENV VARIABLES
+  // REFRESH TOKEN
+  // GOOGLE AUTH
+
 // Package imports
 
 const express = require('express')
@@ -6,10 +11,13 @@ const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const helmet = require("helmet")
 const { verifyApiKey, allow } = require('./middlewares/allow')
+const { handleError } = require('./lib/errors')
 
 // Database
 const database = require('./database/connection')
-database.connect('mongodb://localhost:27017/express-jwt-auth').catch(console.error)
+database.connect('mongodb://localhost:27017/express-jwt-auth').catch(error => {
+  throw new Error('Mongoose cant connect to DB', error)
+})
 
 
 // Router imports
@@ -47,6 +55,10 @@ app.use('/admin', allow(['admin']), (req, res, next) => {
 
 
 // Error management
+app.use((err, req, res, next) => {
+  handleError(err, res)
+})
+
 process.on('unhandledRejection', err => {
   // https://medium.com/@SigniorGratiano/express-error-handling-674bfdd86139
   console.log(err.name, err.message)
