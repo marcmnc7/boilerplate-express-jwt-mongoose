@@ -15,7 +15,7 @@ function generateRefreshToken (userId, roles) {
     { userId, roles },
     process.env.API_SECRET,
     // { expiresIn: `${process.env.REFRESH_TOKEN_LIFETIME_DAYS}`}
-    { expiresIn: `2 minutes`}
+    { expiresIn: `1 minutes`}
     )
   RefreshToken.create({ token })
   return token

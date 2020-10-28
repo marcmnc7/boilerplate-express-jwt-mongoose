@@ -6,6 +6,6 @@ const { allow } = require('../middlewares/allow')
 router.post('/login', allow(['*']), authController.login)
 router.post('/logout', allow(['user']), authController.logout)
 router.post('/register', allow(['*']), authController.register)
-router.post('/refresh-token', allow(['*']), authController.refreshToken)
+router.post('/refresh-token', allow(['*']), authController.getNewAccessToken)
 
 module.exports = router
