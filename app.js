@@ -1,5 +1,4 @@
 // TODO:
-  // REFRESH TOKEN
   // GOOGLE AUTH
   // Reset password mails, etc.
 
