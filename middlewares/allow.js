@@ -3,15 +3,19 @@ const jwtService = require('../services/jwt')
 const { AppError } = require('../lib/errors')
 
 function allow (roles) {  
+  //  * (all), user, admin
   return function (req, res, next) {
     try {
       if (roles.includes('*')) return next()
-
+      
       let { headers: { authorization: encodedToken } } = req
       if (!encodedToken) return next(new AppError(401, 'Not authorized'))
 
-      const { roles: userRoles } = jwtService.verify(encodedToken.replace('Bearer ', ''))
-      if (roles.some(item => userRoles.includes(item))) return next()
+      const decodedToken = jwtService.verify(encodedToken.replace('Bearer ', ''))
+      if (roles.some(item => decodedToken.roles.includes(item))) {
+        req.token = decodedToken
+        return next()
+      }
 
       return next(new AppError(401, 'Not authorized'))
     } catch (error) {

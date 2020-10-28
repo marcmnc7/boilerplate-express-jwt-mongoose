@@ -1,6 +1,7 @@
 // TODO:
   // REFRESH TOKEN
   // GOOGLE AUTH
+  // Reset password mails, etc.
 
 // Package imports
 
@@ -10,7 +11,7 @@ require('dotenv').config({ path: path.resolve(process.cwd(), `.env.${process.env
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const helmet = require("helmet")
-const { verifyApiKey, allow } = require('./middlewares/allow')
+const { verifyApiKey } = require('./middlewares/allow')
 const { handleError } = require('./lib/errors')
 
 // Database
@@ -22,6 +23,7 @@ database.connect(process.env.DATABASE_URI).catch(error => {
 
 // Router imports
 const authRouter = require('./routes/auth')
+const userRouter = require('./routes/users')
 
 
 // General middlewares
@@ -33,26 +35,19 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(verifyApiKey)
 
-// Router middlewares
+// Testing route
 
-app.use('/test', (req, res, next) => {
+app.use('/check', (req, res, next) => {
   res.send('API is working')
 })
 
-app.use('/auth', allow(['*']), authRouter)
 
-app.use('/private', allow(['user']), (req, res, next) => {
-  res.send('Private page')
-})
-app.use('/public', allow(['*']), (req, res, next) => {
-  res.send('Public page')
-})
-app.use('/admin', allow(['admin']), (req, res, next) => {
-  res.send('Public page')
-})
+// Router middlewares
+app.use(verifyApiKey)
 
+app.use('/auth', authRouter)
+app.use('/users', userRouter)
 
 // Error management
 app.use((err, req, res, next) => {

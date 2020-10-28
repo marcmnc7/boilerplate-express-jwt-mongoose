@@ -3,7 +3,14 @@ const { AppError } = require('../lib/errors')
 
 
 async function getOne (filters) {
-  return await User.findOne(filters)
+  const users = await User.find(filters)
+  if (users.length > 1) throw new AppError(500, 'More than one user')
+  return users[0]
+}
+
+
+async function getMany (filters) {
+  return await User.find(filters)
 }
 
 async function createOne (newUser) {
@@ -15,5 +22,6 @@ async function createOne (newUser) {
 
 module.exports = {
   getOne,
+  getMany,
   createOne,
 }
