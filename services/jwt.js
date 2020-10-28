@@ -1,28 +1,27 @@
 const jwt = require("jsonwebtoken")
 const RefreshToken = require('../database/models/refreshToken')
-const { AppError } = require("../lib/errors")
+const { ACCESS_TOKEN_LIFETIME, REFRESH_TOKEN_LIFETIME, API_SECRET } = process.env
 
 function generateUserToken (userId, roles) {
   return jwt.sign(
     { userId, roles },
-    process.env.API_SECRET,
-    { expiresIn: `1 minutes`}
+    API_SECRET,
+    { expiresIn: ACCESS_TOKEN_LIFETIME}
   )
 }
 
 function generateRefreshToken (userId, roles) {
   const token = jwt.sign(
     { userId, roles },
-    process.env.API_SECRET,
-    // { expiresIn: `${process.env.REFRESH_TOKEN_LIFETIME_DAYS}`}
-    { expiresIn: `1 minutes`}
+    API_SECRET,
+    { expiresIn: REFRESH_TOKEN_LIFETIME }
     )
   RefreshToken.create({ token })
   return token
 }
 
 function verify (encodedToken) {
-  return jwt.verify(encodedToken, process.env.API_SECRET)
+  return jwt.verify(encodedToken, API_SECRET)
 }
 
 module.exports = {
