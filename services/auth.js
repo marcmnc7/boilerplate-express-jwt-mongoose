@@ -18,8 +18,9 @@ async function login (email, password) {
   return { accessToken, refreshToken }
 }
 
-async function logout (refreshToken) {
+async function logout (refreshToken, userId) {
   const decodedRefreshToken = jwtService.verify(refreshToken)
+  console.info(333, decodedRefreshToken)
   if (decodedRefreshToken.userId !== userId) throw new AppError(401, 'Unauthorized')
   return await RefreshToken.findOneAndDelete({ token: refreshToken })
 }

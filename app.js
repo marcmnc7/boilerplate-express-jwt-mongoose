@@ -9,6 +9,7 @@ const path = require('path')
 require('dotenv').config({ path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV}`)})
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
+const cors = require('cors')
 const helmet = require("helmet")
 const { verifyApiKey } = require('./middlewares/allow')
 const { handleError } = require('./lib/errors')
@@ -29,6 +30,10 @@ const userRouter = require('./routes/users')
 
 const app = express()
 app.use(helmet())
+app.use(cors({
+  origin: ['http://localhost:3000'],
+  credentials: true,
+}))
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))

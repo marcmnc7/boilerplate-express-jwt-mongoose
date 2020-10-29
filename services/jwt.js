@@ -6,7 +6,7 @@ function generateUserToken (userId, roles) {
   return jwt.sign(
     { userId, roles },
     API_SECRET,
-    { expiresIn: ACCESS_TOKEN_LIFETIME}
+    { expiresIn: parseInt(ACCESS_TOKEN_LIFETIME)}
   )
 }
 
@@ -14,7 +14,7 @@ function generateRefreshToken (userId, roles) {
   const token = jwt.sign(
     { userId, roles },
     API_SECRET,
-    { expiresIn: REFRESH_TOKEN_LIFETIME }
+    { expiresIn: parseInt(REFRESH_TOKEN_LIFETIME) }
     )
   RefreshToken.create({ token })
   return token

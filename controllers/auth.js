@@ -1,16 +1,25 @@
 const userService = require('../services/user')
 const authService = require('../services/auth')
 const { AppError } = require('../lib/errors')
-const RefreshToken = require('../database/models/refreshToken')
 
 async function login (req, res, next) {
   try {
     const { email, password } = req.body
     if (!email || !password) throw new AppError(400, 'Bad request')
-
     const { accessToken, refreshToken } = await authService.login(email, password)
 
-    return res.json({ accessToken, refreshToken })
+    res.cookie('REFRESH_TOKEN', refreshToken, {
+      maxAge: parseInt(process.env.REFRESH_TOKEN_LIFETIME)*1000,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production' ? true : false
+    })
+    res.cookie('ACCESS_TOKEN', accessToken, {
+      maxAge: parseInt(process.env.ACCESS_TOKEN_LIFETIME)*1000,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production' ? true : false
+    })
+
+    return res.end()
   } catch (error) {
     next(error)
   }
@@ -18,11 +27,11 @@ async function login (req, res, next) {
 
 async function logout (req, res, next) {
   try {
-    const { body: { refreshToken }, token: { userId } } = req
-    if (!refreshToken) throw new AppError(401, 'Unauthorized')
+    const { userId } = req.token
+    await authService.logout(req.cookies.REFRESH_TOKEN, userId)
+    res.clearCookie('ACCESS_TOKEN')
+    res.clearCookie('REFRESH_TOKEN')
 
-    await authService.logout(refreshToken)
-    
     return res.send('Logged out')
   } catch (error) {
     next(error)
@@ -44,12 +53,17 @@ async function register (req, res, next) {
 
 async function getNewAccessToken (req, res, next) {
   try {
-    const { body: { refreshToken }} = req
+    const { REFRESH_TOKEN: refreshToken } = req.cookies
     if (!refreshToken) throw new AppError(401, 'Not authorized')
     
     const newAccessToken = await authService.getNewAccessToken(refreshToken)
 
-    return res.json({ accessToken: newAccessToken })
+    res.cookie('ACCESS_TOKEN', newAccessToken, {
+      maxAge: parseInt(process.env.ACCESS_TOKEN_LIFETIME)*1000,
+      httpOnly: true
+    })
+
+    return res.end()
   } catch (error) {
     next(error)
   }

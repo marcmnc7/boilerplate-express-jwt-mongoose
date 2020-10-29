@@ -7,11 +7,11 @@ function allow (roles) {
   return function (req, res, next) {
     try {
       if (roles.includes('*')) return next()
-      
-      let { headers: { authorization: encodedToken } } = req
-      if (!encodedToken) return next(new AppError(401, 'Not authorized'))
 
-      const decodedToken = jwtService.verify(encodedToken.replace('Bearer ', ''))
+      let { ACCESS_TOKEN: encodedToken } = req.cookies
+      if (!encodedToken) return next(new AppError(401, 'Not authorized'))
+      
+      const decodedToken = jwtService.verify(encodedToken)
       if (roles.some(item => decodedToken.roles.includes(item))) {
         req.token = decodedToken
         return next()
