@@ -1,9 +1,9 @@
 // TODO:
-  // GOOGLE AUTH
-  // Reset password mails, etc.
+  // Check errors throwing from: controllers, seervices: homogeinitzar
+  // Other account providers
+  // Auto register routes
 
 // Package imports
-
 const express = require('express')
 const path = require('path')
 require('dotenv').config({ path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV}`)})
@@ -31,7 +31,7 @@ const userRouter = require('./routes/users')
 const app = express()
 app.use(helmet())
 app.use(cors({
-  origin: ['http://localhost:3000'],
+  origin: [process.env.FRONTEND_URL],
   credentials: true,
 }))
 app.use(logger('dev'))

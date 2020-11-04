@@ -28,6 +28,8 @@ async function login (req, res, next) {
 async function logout (req, res, next) {
   try {
     const { userId } = req.token
+    if (!userId) throw new AppError(401, 'Not authorized')
+
     await authService.logout(req.cookies.REFRESH_TOKEN, userId)
     res.clearCookie('ACCESS_TOKEN')
     res.clearCookie('REFRESH_TOKEN')
@@ -69,9 +71,38 @@ async function getNewAccessToken (req, res, next) {
   }
 }
 
+async function sendResetPassword (req, res, next) {
+  try {
+    const { email } = req.body
+    if (!email) throw new AppError(400, 'Bad request')
+    
+    console.info(await authService.sendResetPasswordMail(email))
+    
+    return res.end()
+  } catch (error) {
+    next(error)
+  }
+}
+
+async function resetPassword (req, res, next) {
+  try {
+    const { body: { email, code, newPassword1, newPassword2 } } = req
+    if (!email || !code || !newPassword1 || !newPassword2) throw new AppError(400, 'Bad request')
+    if (newPassword1 !== newPassword2) throw new AppError(400, 'Passwords mismatch')
+
+    const user = await authService.resetPassword(code, email, newPassword1)
+
+    return res.json(user)
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   login,
   logout,
   register,
-  getNewAccessToken
+  getNewAccessToken,
+  sendResetPassword,
+  resetPassword,
 }
