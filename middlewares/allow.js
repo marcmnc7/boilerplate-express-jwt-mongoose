@@ -17,7 +17,7 @@ function allow (roles) {
         return next()
       }
 
-      return next(new AppError(401, 'Not authorized'))
+      return next(new AppError(403, 'Not authorized'))
     } catch (error) {
       next(error)
     }

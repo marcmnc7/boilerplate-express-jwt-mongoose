@@ -1,8 +1,3 @@
-// TODO:
-  // Check errors throwing from: controllers, seervices: homogeinitzar
-  // Other account providers
-  // Auto register routes
-
 // Package imports
 const express = require('express')
 const path = require('path')

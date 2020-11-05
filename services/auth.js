@@ -12,7 +12,7 @@ async function login (email, password) {
   if (!user) throw new AppError(400, 'User not exists')
   
   const correctPassword = bcrypt.compareSync(password, user.password)
-  if (!correctPassword) throw new AppError(400, 'Invalid password')
+  if (!correctPassword) throw new AppError(403, 'Not authorized')
 
   const accessToken = jwtService.generateUserToken(user.id, user.roles)
   const refreshToken = jwtService.generateRefreshToken(user.id, user.roles)
@@ -22,7 +22,7 @@ async function login (email, password) {
 
 async function logout (refreshToken, userId) {
   const decodedRefreshToken = jwtService.verify(refreshToken)
-  if (decodedRefreshToken.userId !== userId) throw new AppError(401, 'Unauthorized')
+  if (decodedRefreshToken.userId !== userId) throw new AppError(403, 'Unauthorized')
   return await RefreshToken.findOneAndDelete({ token: refreshToken })
 }
 
@@ -33,7 +33,7 @@ async function register (email, password, roles) {
 
 async function getNewAccessToken (refreshToken) {
   const tokenDoc = await RefreshToken.findOne({ token: refreshToken })
-  if (!tokenDoc) throw new AppError(401, 'Not authorized')
+  if (!tokenDoc) throw new AppError(403, 'Not authorized')
   try {
     const { userId, roles } = jwtService.verify(refreshToken)    
     return await jwtService.generateUserToken(userId, roles)
@@ -41,26 +41,26 @@ async function getNewAccessToken (refreshToken) {
     if (error.name === 'TokenExpiredError') {
       RefreshToken.findOneAndDelete({ token: refreshToken }).catch(console.error)
     }
-    throw new AppError(error)
+    throw error
   }
 }
 
 async function sendResetPasswordMail (email) {
   const user = await userService.getOne({ email })
-  if (!user) throw new AppError(401, 'Not authorized')
+  if (!user) throw new AppError(403, 'Not authorized')
   const { code } = await ResetPasswordCode.create({ user: user._id })
   return await emailService.sendMail('Reset Password', `Entra en este link y usa el siguiente codigo: ${code}. Valido por 24h.`, user.email)
 }
 
 async function resetPassword (code, email, newPassword) {
   const user = await userService.getOne({ email })
-  if(!user) throw new AppError(400, 'Bad request')
+  if(!user) throw new AppError(403, 'Not authorized')
 
   const resetPasswordCode = await ResetPasswordCode.findOne({ code, user: user._id })
   const now = DateTime.local()
-  if (!resetPasswordCode ) throw new AppError(401, 'Invalid code')
-  if (resetPasswordCode.used) throw new AppError(401, 'Code already used')
-  if (DateTime.fromSeconds(resetPasswordCode.expiresAt) < now)  throw new AppError(401, 'Code expired')
+  if (!resetPasswordCode ) throw new AppError(403, 'Invalid code')
+  if (resetPasswordCode.used) throw new AppError(403, 'Code already used')
+  if (DateTime.fromSeconds(resetPasswordCode.expiresAt) < now)  throw new AppError(403, 'Code expired')
   
   user.password = newPassword
   resetPasswordCode.used = true
