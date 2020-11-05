@@ -76,7 +76,7 @@ async function sendResetPassword (req, res, next) {
     const { email } = req.body
     if (!email) throw new AppError(400, 'Bad request')
     
-    console.info(await authService.sendResetPasswordMail(email))
+    await authService.sendResetPasswordMail(email)
     
     return res.end()
   } catch (error) {
